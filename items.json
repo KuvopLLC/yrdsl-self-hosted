@@ -1,35 +1,11 @@
 [
   {
-    "id": "couch-01",
-    "title": "Mid-century sectional sofa",
-    "price": 450,
-    "tags": ["furniture", "living room"],
-    "added": "2026-04-17",
-    "image": "/photos/couch.jpg",
-    "description": "Three-seat sectional in charcoal linen. Lightly used, one scuff on the back-left leg. 94\" × 36\" × 32\". You'll need two people and a truck.",
+    "id": "sample-01",
+    "title": "Replace me with your first item",
+    "price": 25,
+    "tags": ["replace-this"],
+    "added": "2026-04-20",
+    "description": "Delete this entry and add your own. Drop photos in public/photos/ and reference them as \"/photos/your-photo.jpg\".",
     "reserved": null
-  },
-  {
-    "id": "bike-01",
-    "title": "Vintage steel road bike, 56cm",
-    "price": 320,
-    "tags": ["bikes", "outdoor"],
-    "added": "2026-04-16",
-    "image": "/photos/bike.jpg",
-    "description": "Classic lugged-steel road bike, 56cm frame (fits riders around 5'9\" to 6'0\"). Recently tuned, fresh bar tape, new brake pads.",
-    "reserved": null
-  },
-  {
-    "id": "lamp-01",
-    "title": "Brass arc floor lamp",
-    "price": 95,
-    "tags": ["lighting", "vintage"],
-    "added": "2026-04-15",
-    "image": "/photos/lamp.jpg",
-    "description": "Heavy marble base, 76\" arc. Takes a standard E26 bulb. Small patina on the arm, otherwise perfect.",
-    "reserved": {
-      "on": "2026-04-18",
-      "price": 85
-    }
   }
 ]
