@@ -1,57 +1,68 @@
 # yrdsl-self-hosted
 
-A yard sale you self-host. Edit two JSON files, push to GitHub, GitHub
-Pages serves it. No database, no auth, no server.
+A yard sale you self-host. One sale, two JSON files, zero backend.
+GitHub Pages serves it; GitHub Actions deploys it; Claude can edit it.
 
-Live demo: <https://mreider.github.io/yrdsl-example/>
+**Live demo:** <https://mreider.github.io/yrdsl-example/>
 
-This is the self-hosted flavor of [yrdsl.app](https://yrdsl.app). If you
-want the managed version (multi-sale accounts, email confirmation,
-Claude via MCP over HTTPS, billing), sign up at yrdsl.app instead. Both
-render from the exact same JSON shape, so you can move between them
-without rewriting your data.
+## What you get
 
-## Fork-and-run
+- A clean, themeable gallery of your stuff with search, tag chips, sort,
+  and a deep-link-able item modal.
+- Direct contact: buyers email, text, or WhatsApp you. No platform inbox.
+- Four themes (`conservative`, `retro`, `hip`, `artsy`).
+- Multi-language support: add a `_de` / `_es` / etc. sibling key for any
+  text field in `site.json` and the locale picker handles the rest.
 
-1. Click **Use this template** → create your own repo (name it whatever).
-2. Clone your new repo.
-3. Edit `site.json` (your sale's name, location, contact info).
-4. Edit `items.json` (your items).
+No database, no auth, no Worker, no email service, no billing.
+
+## Stand it up
+
+1. **Use this template** (button at the top of this repo) → create your
+   own repo. Name it whatever you want.
+2. Clone your new repo locally.
+3. Edit `site.json` (your sale's name, location, contact info, theme).
+4. Edit `items.json` (your items, prices, photos).
 5. Drop photos into `public/photos/` and reference them as
-   `/photos/<filename>` from `items.json`.
-6. `git commit && git push`.
-7. In your repo's **Settings → Pages**, set source to "GitHub Actions".
+   `/photos/<filename>` from `items.json`. (External URLs work too.)
+6. Commit and push:
+   ```bash
+   git add -A && git commit -m "my sale" && git push
+   ```
+7. In your repo's **Settings → Pages**, set source to **GitHub Actions**.
 
-The first push triggers `.github/workflows/deploy.yml` which builds and
-publishes. Usually live in under a minute at
-`https://<your-username>.github.io/<your-repo>/`.
+The first push triggers `.github/workflows/deploy.yml` which validates
+the JSON, builds with Vite, and publishes. Usually live in under a
+minute at `https://<your-username>.github.io/<your-repo>/`.
 
-## Run it locally first
+## Edit locally first
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-Opens on `http://localhost:5173`. Hot-reloads on JSON changes.
+Opens on <http://localhost:5173>. Hot-reloads on JSON changes.
 
-To validate the JSON shapes without starting the dev server:
+To check the JSON shapes without booting the dev server:
 
 ```bash
 pnpm validate
 ```
 
-## Using Claude to edit
+This is the same check the CI runs before deploy.
+
+## Edit with Claude
 
 Open this repo in Claude Code. The `SKILL.md` at the repo root tells
-Claude the file layout and common edits ("add an item", "mark reserved",
-"change the theme"). Claude uses its built-in Read/Edit/Write/Bash tools
-so nothing else needs to be installed.
+Claude the file layout and the common edit patterns ("add an item",
+"mark reserved", "switch the theme"). Claude uses its built-in
+Read/Edit/Write/Bash tools, so nothing else needs to be installed.
 
-Example prompts that work well:
+Prompts that work well:
 
 - *"Add a toaster for $25, tags kitchen + appliance, using the photo I
-   just saved as toaster.jpg."*
+  just saved as toaster.jpg."*
 - *"Mark the couch reserved for $400 as of today."*
 - *"Switch the theme to retro."*
 - *"Commit and push."*
@@ -61,20 +72,42 @@ Example prompts that work well:
 1. Add a `CNAME` file at the repo root with your domain (e.g.
    `sale.mydomain.com`).
 2. Point a CNAME DNS record at `<your-username>.github.io`.
-3. In the repo's Settings → Pages, add the custom domain.
-4. Edit `vite.config.ts` so `base` is `"/"` (remove the
-   `GH_PAGES_BASE` override in the workflow).
+3. In **Settings → Pages**, add the custom domain.
+4. In `.github/workflows/deploy.yml`, remove the `GH_PAGES_BASE` env var
+   so Vite builds with `base = "/"`.
 
-## Theme options
+## File layout
 
-Four themes ship with the renderer: `conservative`, `retro`, `hip`,
-`artsy`. Set `"theme"` in `site.json`.
+```
+site.json           # the sale's metadata
+items.json          # the array of items
+public/photos/      # photo files referenced from items.json
+src/vendor/         # the renderer (don't edit; vendored from the upstream repo)
+.github/workflows/  # auto-deploys on push to main
+SKILL.md            # tells Claude how to edit this repo
+scripts/validate.mjs # pre-deploy JSON validation
+```
 
-## Schema
+## JSON shape
 
-JSON shapes are defined as zod schemas in `src/vendor/core/sale.ts`.
-They're identical to what the hosted yrdsl.app API produces, so export
-from one and import into the other works cleanly.
+`site.json` and `items.json` validate against the zod schemas in
+`src/vendor/core/sale.ts`. The same shapes are produced by the hosted
+version of yrdsl.app, so you can move data between modes losslessly. See
+the [PRD §4.4](https://github.com/mreider/yard-sale/blob/main/PRD.md#44-distribution-modes)
+for the full hosted-vs-self-hosted comparison.
+
+## Want the hosted version instead?
+
+If you'd rather have multi-sale accounts, email confirmation, Claude
+over MCP from your phone, and metered billing, sign up at
+<https://yrdsl.app>. Operated by Kuvop LLC.
+
+## Upstream
+
+The renderer source lives at <https://github.com/mreider/yard-sale> in
+`packages/viewer`. To pull a new version into your fork's `src/vendor/`,
+copy the files over and bump the deps in `package.json`. A vendor-refresh
+script is planned but not built.
 
 ## License
 
