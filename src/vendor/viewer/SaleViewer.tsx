@@ -1,4 +1,4 @@
-import type { SaleItem, SaleSite } from '../core/sale.js';
+import type { SaleItem, SaleSite } from '@yrdsl/core';
 import { useEffect, useMemo, useState } from 'react';
 
 export interface SaleViewerProps {
