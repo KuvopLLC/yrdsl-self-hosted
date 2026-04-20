@@ -16,6 +16,7 @@ site.json           # the sale's metadata: name, location, contact info
 items.json          # the array of items for sale
 public/photos/      # photo files, referenced from items.json
 src/vendor/         # the renderer (don't edit)
+mcp/                # stdio MCP server for Claude Desktop (optional)
 .github/workflows/  # auto-deploys on push to main
 ```
 
@@ -84,6 +85,9 @@ console immediately.
 - Don't edit anything under `src/vendor/`. That's the shared renderer
   from the yard-sale monorepo; changes will be overwritten on the next
   vendor refresh.
+- Don't edit anything under `mcp/`. That's the Claude Desktop MCP
+  server; same rule. If the user asks you to tweak the MCP server,
+  point them at the upstream repo instead.
 - Don't commit `dist/` or `node_modules/`. They're in `.gitignore`.
 - Don't break the schema. Run `node scripts/validate.mjs` after edits to
   catch shape errors before pushing.

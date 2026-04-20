@@ -55,12 +55,46 @@ This is the same check the CI runs before deploy.
 
 ## Edit with Claude
 
-Open this repo in Claude Code. The `SKILL.md` at the repo root tells
-Claude the file layout and the common edit patterns ("add an item",
-"mark reserved", "switch the theme"). Claude uses its built-in
-Read/Edit/Write/Bash tools, so nothing else needs to be installed.
+Two paths, pick whichever fits your workflow:
 
-Prompts that work well:
+### Claude Code (easiest, no install)
+
+Open this repo in Claude Code. The `SKILL.md` at the repo root tells
+Claude the file layout and the common edit patterns. Claude uses its
+built-in Read/Edit/Write/Bash tools, so nothing else needs to be
+installed.
+
+### Claude Desktop via MCP (works from the desktop app chat)
+
+This repo ships an MCP server at `mcp/server.mjs` that exposes typed
+tools (`add_item`, `mark_reserved`, `update_site`, `commit_and_push`,
+etc.) to Claude Desktop. One-time setup:
+
+```bash
+cd mcp
+pnpm install
+```
+
+Then add this to your Claude Desktop config (macOS:
+`~/Library/Application Support/Claude/claude_desktop_config.json`,
+Windows: `%APPDATA%\Claude\claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "yrdsl": {
+      "command": "node",
+      "args": ["/absolute/path/to/your-fork/mcp/server.mjs"],
+      "env": { "YRDSL_REPO": "/absolute/path/to/your-fork" }
+    }
+  }
+}
+```
+
+Restart Claude Desktop. You'll see the "yrdsl" server listed in the
+MCP menu; Claude can now edit the sale directly from any chat.
+
+### Prompts that work well
 
 - *"Add a toaster for $25, tags kitchen + appliance, using the photo I
   just saved as toaster.jpg."*
