@@ -31,7 +31,7 @@ Edit `items.json` to append a new entry. The shape is:
   "price": 45,
   "tags": ["furniture", "kitchen"],
   "added": "2026-04-20",
-  "image": "/photos/thing.jpg",
+  "image": "photos/thing.jpg",
   "description": "A paragraph describing the item.",
   "reserved": null
 }
@@ -39,7 +39,7 @@ Edit `items.json` to append a new entry. The shape is:
 
 Generate a kebab-case `id` from the title (e.g. `toaster-01`). `added` is
 today's ISO date. If the user gives you a photo, save it under
-`public/photos/` and reference it as `/photos/<file>`.
+`public/photos/` and reference it as `photos/<file>` (relative path, no leading slash. The browser resolves it against the page URL, which works whether the site is deployed to a GH Pages subpath or a custom domain root).
 
 ### Mark an item reserved
 Set the `reserved` field on the matching item:

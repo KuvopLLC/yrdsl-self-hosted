@@ -24,7 +24,8 @@ No database, no auth, no Worker, no email service, no billing.
 3. Edit `site.json` (your sale's name, location, contact info, theme).
 4. Edit `items.json` (your items, prices, photos).
 5. Drop photos into `public/photos/` and reference them as
-   `/photos/<filename>` from `items.json`. (External URLs work too.)
+   `photos/<filename>` from `items.json` (relative path, no leading
+   slash. External URLs work too.).
 6. Commit and push:
    ```bash
    git add -A && git commit -m "my sale" && git push
@@ -93,7 +94,7 @@ scripts/validate.mjs # pre-deploy JSON validation
 `site.json` and `items.json` validate against the zod schemas in
 `src/vendor/core/sale.ts`. The same shapes are produced by the hosted
 version of yrdsl.app, so you can move data between modes losslessly. See
-the [PRD §4.4](https://github.com/mreider/yard-sale/blob/main/PRD.md#44-distribution-modes)
+the [PRD §4.4](https://github.com/KuvopLLC/yard-sale/blob/main/PRD.md#44-distribution-modes)
 for the full hosted-vs-self-hosted comparison.
 
 ## Want the hosted version instead?
@@ -104,7 +105,7 @@ over MCP from your phone, and metered billing, sign up at
 
 ## Upstream
 
-The renderer source lives at <https://github.com/mreider/yard-sale> in
+The renderer source lives at <https://github.com/KuvopLLC/yard-sale> in
 `packages/viewer`. To pull a new version into your fork's `src/vendor/`,
 copy the files over and bump the deps in `package.json`. A vendor-refresh
 script is planned but not built.
