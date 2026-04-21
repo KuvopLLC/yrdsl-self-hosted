@@ -78,6 +78,75 @@ export const SaleContact = z.object({
 });
 export type SaleContact = z.infer<typeof SaleContact>;
 
+// ─── API request body schemas ────────────────────────────────────────────
+// What the client sends over HTTP for CRUD. Distinct from SaleSite/SaleItem
+// which are the rendering shape.
+
+export const CreateSaleBody = z.object({
+  title: z.string().min(1).max(100),
+  description: z.string().max(2000).optional(),
+  theme: z.enum(['conservative', 'retro', 'hip', 'artsy']).optional(),
+  language: z.string().min(2).max(10).optional(),
+  currency: z.string().length(3).optional(),
+  contact: z
+    .object({
+      email: z.string().email().optional(),
+      sms: z.string().optional(),
+      whatsapp: z.string().optional(),
+      useRelay: z.boolean().optional(),
+      notes: z.string().max(500).optional(),
+    })
+    .optional(),
+});
+export type CreateSaleBody = z.infer<typeof CreateSaleBody>;
+
+export const UpdateSaleBody = CreateSaleBody.partial().extend({
+  slug: z
+    .string()
+    .regex(/^[a-z0-9][a-z0-9-]{0,63}$/)
+    .optional(),
+});
+export type UpdateSaleBody = z.infer<typeof UpdateSaleBody>;
+
+export const CreateItemBody = z.object({
+  title: z.string().min(1).max(200),
+  price: z.number().nonnegative(),
+  tags: z.array(z.string().max(40)).max(20).optional(),
+  description: z.string().max(4000).optional(),
+  image: z.string().max(500).optional(),
+  images: z.array(z.string().max(500)).max(10).optional(),
+  added: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
+});
+export type CreateItemBody = z.infer<typeof CreateItemBody>;
+
+// POST /sales/:saleId/items/reorder — atomic batch reassignment of
+// sort_order. Caller sends the full ordered list; positions in the array
+// become the new sort_order (0, 1, 2, …).
+export const ReorderItemsBody = z.object({
+  ids: z.array(z.string()).min(1).max(500),
+});
+export type ReorderItemsBody = z.infer<typeof ReorderItemsBody>;
+
+export const UpdateItemBody = CreateItemBody.partial().extend({
+  reserved: z
+    .union([
+      z.null(),
+      z.object({
+        on: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+        price: z.number().nonnegative(),
+        note: z.string().max(500).optional(),
+      }),
+    ])
+    .optional(),
+  sortOrder: z.number().int().optional(),
+});
+export type UpdateItemBody = z.infer<typeof UpdateItemBody>;
+
+// ─── Canonical rendering shapes (what /public/sales/... returns) ─────────
+
 export const SaleSite = z
   .object({
     siteName: z.string(),
