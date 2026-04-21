@@ -22,7 +22,21 @@ function makeMoneyFormatter(currency: string, locale: string) {
   }
 }
 
-type SortKey = 'newest' | 'oldest' | 'price-asc' | 'price-desc';
+type SortKey = 'manual' | 'newest' | 'oldest' | 'price-asc' | 'price-desc';
+
+/**
+ * "Manual" sort honors the `sortOrder` field set by the editor's ↑/↓
+ * controls (hosted) or by hand-editing items.json (self-hosted). Items
+ * without `sortOrder` sort to the end and tie-break newest-first.
+ *
+ * Default sort is "manual" iff at least one item has `sortOrder` set.
+ * That way a self-hosted items.json that never sets `sortOrder` keeps
+ * its existing newest-first behavior, and exports from the hosted
+ * editor (which always sets `sortOrder`) preserve the curator's order.
+ */
+function hasManualOrder(items: SaleItem[]): boolean {
+  return items.some((i) => typeof i.sortOrder === 'number');
+}
 
 /** Look up `field` on `site`, preferring `${field}_${locale}` when a locale is set. */
 function localized<T>(site: SaleSite, field: string, locale?: string): T | undefined {
@@ -36,7 +50,7 @@ function localized<T>(site: SaleSite, field: string, locale?: string): T | undef
 
 export function SaleViewer({ site, items, locale }: SaleViewerProps) {
   const [q, setQ] = useState('');
-  const [sort, setSort] = useState<SortKey>('newest');
+  const [sort, setSort] = useState<SortKey>(() => (hasManualOrder(items) ? 'manual' : 'newest'));
   const [hideReserved, setHideReserved] = useState(true);
   const [onlyReserved, setOnlyReserved] = useState(false);
   const [activeTags, setActiveTags] = useState<string[]>([]);
@@ -82,6 +96,14 @@ export function SaleViewer({ site, items, locale }: SaleViewerProps) {
       );
     }
     return [...out].sort((a, b) => {
+      if (sort === 'manual') {
+        const ao = typeof a.sortOrder === 'number' ? a.sortOrder : Number.MAX_SAFE_INTEGER;
+        const bo = typeof b.sortOrder === 'number' ? b.sortOrder : Number.MAX_SAFE_INTEGER;
+        if (ao !== bo) return ao - bo;
+        // Tie-break newest first so freshly-added items (sortOrder still 0)
+        // surface above older ones at the same position.
+        return b.added.localeCompare(a.added);
+      }
       if (sort === 'newest') return b.added.localeCompare(a.added);
       if (sort === 'oldest') return a.added.localeCompare(b.added);
       if (sort === 'price-asc') return a.price - b.price;
@@ -132,6 +154,7 @@ export function SaleViewer({ site, items, locale }: SaleViewerProps) {
         setHideReserved={setHideReserved}
         onlyReserved={onlyReserved}
         setOnlyReserved={setOnlyReserved}
+        showManual={hasManualOrder(items)}
       />
 
       {allTags.length > 0 && (
@@ -179,6 +202,8 @@ interface ControlsProps {
   setHideReserved: (v: boolean) => void;
   onlyReserved: boolean;
   setOnlyReserved: (v: boolean) => void;
+  /** Whether the "Curator's order" sort option appears in the dropdown. */
+  showManual: boolean;
 }
 
 function Controls(p: ControlsProps) {
@@ -196,6 +221,7 @@ function Controls(p: ControlsProps) {
         value={p.sort}
         onChange={(e) => p.setSort(e.target.value as SortKey)}
       >
+        {p.showManual && <option value="manual">Curator's order</option>}
         <option value="newest">Newest first</option>
         <option value="oldest">Oldest first</option>
         <option value="price-asc">Price: low to high</option>
