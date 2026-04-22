@@ -446,7 +446,9 @@ function ContactBlock({
         {contact.whatsapp && (
           <a
             className="btn"
-            href={`https://wa.me/${contact.whatsapp}?text=${body}`}
+            // wa.me expects digits only, no leading "+". Strip the + that
+            // the editor's PhoneInput writes in E.164 format.
+            href={`https://wa.me/${contact.whatsapp.replace(/^\+/, '')}?text=${body}`}
             target="_blank"
             rel="noreferrer"
           >
