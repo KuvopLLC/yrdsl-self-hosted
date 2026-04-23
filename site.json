@@ -6,6 +6,7 @@
   "theme": "conservative",
   "currency": "USD",
   "language": "en",
+  "url": "https://your-username.github.io/your-repo",
   "contact": {
     "email": "you@example.com",
     "notes": "How to pay (cash? Venmo?). Pickup hours."

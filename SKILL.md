@@ -62,6 +62,13 @@ Edit `site.json`. Theme is one of: `conservative`, `retro`, `hip`,
 `artsy`. Contact accepts `email`, `sms`, `whatsapp` (digits only, no
 `+`), and an optional `notes` field.
 
+### Set the deployed site URL
+The optional `url` field in `site.json` is the canonical address where
+this sale is hosted (e.g. `https://username.github.io/my-sale` or
+`https://yard.mydomain.com`). The MCP server uses it to return a
+`publicUrl` after every add / edit so Claude can share a direct link
+to what was changed. Leave it unset and those URLs just won't appear.
+
 ### Deploy the changes
 After editing, run:
 
