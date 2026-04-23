@@ -1,5 +1,5 @@
 import type { SaleItem, SaleSite } from '../core/sale.js';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 export interface SaleViewerProps {
   site: SaleSite;
@@ -287,6 +287,17 @@ function TagChips({
   );
 }
 
+/**
+ * Normalize the images on an item. The schema has both a legacy `image`
+ * (single) and `images[]` (array). Viewer + editor standardize on the
+ * array, falling back to [image] when that's all that exists.
+ */
+function imagesOf(item: SaleItem): string[] {
+  if (item.images && item.images.length > 0) return item.images;
+  if (item.image) return [item.image];
+  return [];
+}
+
 function Card({
   item,
   onOpen,
@@ -297,7 +308,7 @@ function Card({
   money: (n: number) => string;
 }) {
   const reserved = !!item.reserved;
-  const image = item.image ?? item.images?.[0];
+  const imgs = imagesOf(item);
   return (
     <article
       className={`card${reserved ? ' reserved' : ''}`}
@@ -308,7 +319,22 @@ function Card({
     >
       <div className="thumb">
         {reserved && <span className="badge reserved-badge badge-abs">Reserved</span>}
-        {image && <img src={image} alt={item.title} loading="lazy" />}
+        {imgs[0] && <img src={imgs[0]} alt={item.title} loading="lazy" />}
+        {imgs.length > 1 && (
+          <span className="photo-count" aria-label={`${imgs.length} photos`}>
+            <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">
+              <path
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3 7h4l2-2h6l2 2h4v12H3z M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"
+              />
+            </svg>
+            {imgs.length}
+          </span>
+        )}
       </div>
       <div className="body">
         <div className="title">{item.title}</div>
@@ -346,10 +372,27 @@ function Modal({
   onClose: () => void;
 }) {
   const [copied, setCopied] = useState(false);
+  const imgs = imagesOf(item);
+  const imgCount = imgs.length;
+  const [imgIdx, setImgIdx] = useState(0);
+
+  // Reset carousel position when switching items without closing the modal
+  // (relevant if we later add prev/next-item nav; harmless otherwise).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally reset only on item change
+  useEffect(() => {
+    setImgIdx(0);
+  }, [item.id]);
+
+  const prev = useCallback(() => setImgIdx((i) => (i - 1 + imgCount) % imgCount), [imgCount]);
+  const next = useCallback(() => setImgIdx((i) => (i + 1) % imgCount), [imgCount]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
+      if (imgCount > 1) {
+        if (e.key === 'ArrowLeft') prev();
+        if (e.key === 'ArrowRight') next();
+      }
     };
     document.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
@@ -357,10 +400,31 @@ function Modal({
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = '';
     };
-  }, [onClose]);
+  }, [onClose, imgCount, prev, next]);
+
+  // Minimal touch-swipe: record the start X on touchstart, fire prev/next
+  // on touchend when the horizontal delta exceeds a small threshold.
+  // Vertical-dominant gestures fall through so the page can scroll.
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const onTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    if (!t) return;
+    touchStart.current = { x: t.clientX, y: t.clientY };
+  };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    const start = touchStart.current;
+    touchStart.current = null;
+    if (!start || imgs.length <= 1) return;
+    const t = e.changedTouches[0];
+    if (!t) return;
+    const dx = t.clientX - start.x;
+    const dy = t.clientY - start.y;
+    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+    if (dx > 0) prev();
+    else next();
+  };
 
   const reserved = !!item.reserved;
-  const image = item.image ?? item.images?.[0];
   const contact = site.contact;
 
   function share() {
@@ -376,9 +440,42 @@ function Modal({
         <button type="button" className="close" onClick={onClose} aria-label="Close">
           ×
         </button>
-        <div className="image">
+        <div className="image" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
           {reserved && <span className="badge reserved-badge badge-abs">Reserved</span>}
-          {image && <img src={image} alt={item.title} />}
+          {imgs[imgIdx] && <img src={imgs[imgIdx]} alt={item.title} />}
+          {imgs.length > 1 && (
+            <>
+              <button
+                type="button"
+                className="carousel-nav carousel-prev"
+                onClick={prev}
+                aria-label="Previous photo"
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                className="carousel-nav carousel-next"
+                onClick={next}
+                aria-label="Next photo"
+              >
+                ›
+              </button>
+              <div className="carousel-dots" role="tablist" aria-label="Photo selector">
+                {imgs.map((url, i) => (
+                  <button
+                    key={url}
+                    type="button"
+                    className={`carousel-dot${i === imgIdx ? ' active' : ''}`}
+                    onClick={() => setImgIdx(i)}
+                    aria-label={`Photo ${i + 1} of ${imgs.length}`}
+                    aria-selected={i === imgIdx}
+                    role="tab"
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </div>
         <div className="content">
           <h2>{item.title}</h2>

@@ -359,6 +359,24 @@ a {
   top: 12px;
   left: 12px;
 }
+.card .photo-count {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  background: rgba(24, 24, 27, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-radius: 999px;
+  line-height: 1;
+}
 
 /* compact density */
 .density-compact {
@@ -457,17 +475,92 @@ a {
   background: #f4f4f5;
   min-height: 300px;
   position: relative;
+  touch-action: pan-y; /* let vertical scroll through, capture horizontal for swipe */
 }
 .modal .image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   max-height: calc(100vh - 48px);
+  user-select: none;
+  -webkit-user-drag: none;
 }
 .modal .image .badge-abs {
   position: absolute;
   top: 16px;
   left: 16px;
+}
+
+/* Carousel affordances — only rendered when an item has 2+ photos. */
+.modal .carousel-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-size: 24px;
+  line-height: 1;
+  color: var(--ink);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  box-shadow: var(--shadow-md);
+  transition: background .12s, transform .12s;
+  z-index: 2;
+}
+.modal .carousel-nav:hover {
+  background: #fff;
+  transform: translateY(-50%) scale(1.05);
+}
+.modal .carousel-prev {
+  left: 12px;
+}
+.modal .carousel-next {
+  right: 12px;
+}
+@media (max-width: 820px) {
+  .modal .carousel-nav {
+    width: 36px;
+    height: 36px;
+    font-size: 22px;
+  }
+}
+.modal .carousel-dots {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  padding: 6px 10px;
+  background: rgba(24, 24, 27, 0.45);
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 2;
+}
+.modal .carousel-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.5);
+  padding: 0;
+  cursor: pointer;
+  transition: background .12s, width .12s;
+}
+.modal .carousel-dot.active {
+  background: #fff;
+  width: 18px;
+  border-radius: 999px;
+}
+.modal .carousel-dot:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.8);
 }
 
 .modal .content {

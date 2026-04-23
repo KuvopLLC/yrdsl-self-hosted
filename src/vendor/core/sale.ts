@@ -54,6 +54,15 @@ export const SaleItem = z.object({
   sortOrder: z.number().int().optional(),
   /** Host-only: last-edit timestamp (ISO-8601). */
   updatedAt: z.string().optional(),
+  /**
+   * Host-only: absolute URL where this item is visible to the public.
+   * Populated by the hosted API; the self-hosted template leaves it out.
+   * Clients (SPA, MCP) should surface it after create/update so users /
+   * assistants can share or link to the item without guessing URL shape.
+   */
+  publicUrl: z.string().optional(),
+  /** Host-only: absolute URL where the owner can edit this item. */
+  editorUrl: z.string().optional(),
 });
 export type SaleItem = z.infer<typeof SaleItem>;
 
@@ -170,6 +179,15 @@ export const SaleSite = z
     archivedAt: z.string().optional(),
     createdAt: z.string().optional(),
     updatedAt: z.string().optional(),
+    /**
+     * Host-only: absolute URL where this sale is viewable by the public.
+     * Populated by the hosted API when the sale is published. Clients
+     * (SPA, MCP) should surface this so users / assistants can share the
+     * sale without reconstructing the URL.
+     */
+    publicUrl: z.string().optional(),
+    /** Host-only: absolute URL where the owner can edit this sale. */
+    editorUrl: z.string().optional(),
   })
   .passthrough(); // sibling locale keys like `siteName_de` pass through.
 export type SaleSite = z.infer<typeof SaleSite>;
