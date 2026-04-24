@@ -1,11 +1,11 @@
 ---
 name: yrdsl-self-hosted
-description: Edit a static yard sale site. Updates site.json / items.json, adds photos to public/photos/, and pushes via git so GitHub Pages rebuilds.
+description: Edit a static digital yard sale site. Updates site.json / items.json, adds photos to public/photos/, and pushes via git so GitHub Pages rebuilds.
 ---
 
-# Running this yard sale with Claude
+# Running this digital yard sale with Claude
 
-You're inside a yrdsl-self-hosted template repo. This is a static yard sale
+You're inside a yrdsl-self-hosted template repo. This is a static digital yard sale
 site that deploys to GitHub Pages. The whole sale is two JSON files plus
 photos. There's no database, no API, no auth.
 

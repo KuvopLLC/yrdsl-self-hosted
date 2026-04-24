@@ -1,42 +1,33 @@
 # yrdsl-self-hosted
 
-A yard sale you self-host. One sale, two JSON files, zero backend.
-GitHub Pages serves it; GitHub Actions deploys it; Claude can edit it.
+[![Deploy](https://github.com/KuvopLLC/yrdsl-self-hosted/actions/workflows/deploy.yml/badge.svg)](https://github.com/KuvopLLC/yrdsl-self-hosted/actions/workflows/deploy.yml)
 
-**Live demo:** <https://mreider.github.io/yrdsl-example/>
+Template repo for running a single digital yard sale on GitHub Pages. A sale is
+one web page listing items with photos, prices, short descriptions, and
+contact buttons (email, SMS, WhatsApp). Data lives in two JSON files
+(`site.json`, `items.json`) plus a `public/photos/` folder. GitHub
+Actions builds the site on every push.
 
-## What you get
+Example: <https://mreider.github.io/yrdsl-example/>.
 
-- A clean, themeable gallery of your stuff with search, tag chips, sort,
-  and a deep-link-able item modal.
-- Direct contact: buyers email, text, or WhatsApp you. No platform inbox.
-- Four themes (`conservative`, `retro`, `hip`, `artsy`).
-- Multi-language support: add a `_de` / `_es` / etc. sibling key for any
-  text field in `site.json` and the locale picker handles the rest.
-
-No database, no auth, no Worker, no email service, no billing.
+The hosted version is at <https://yrdsl.app>.
 
 ## Stand it up
 
-1. **Use this template** (button at the top of this repo) → create your
-   own repo. Name it whatever you want.
-2. Clone your new repo locally.
-3. Edit `site.json` (your sale's name, location, contact info, theme).
-4. Edit `items.json` (your items, prices, photos).
-5. Drop photos into `public/photos/` and reference them as
-   `photos/<filename>` from `items.json` (relative path, no leading
-   slash. External URLs work too.).
-6. Commit and push:
-   ```bash
-   git add -A && git commit -m "my sale" && git push
-   ```
-7. In your repo's **Settings → Pages**, set source to **GitHub Actions**.
+1. Click **Use this template** at the top of this repo. Name your new
+   repo whatever you want.
+2. Clone your fork locally.
+3. Edit `site.json` (sale name, location, contact info, theme) and
+   `items.json` (items, prices, tags, photos).
+4. Drop photos into `public/photos/` and reference them from
+   `items.json` as `photos/<filename>` (relative path, no leading
+   slash). External URLs also work.
+5. In your repo's **Settings → Pages**, set source to **GitHub Actions**.
+6. Commit and push. The `deploy.yml` workflow validates the JSON,
+   builds with Vite, and publishes at
+   `https://<your-username>.github.io/<your-repo>/`.
 
-The first push triggers `.github/workflows/deploy.yml` which validates
-the JSON, builds with Vite, and publishes. Usually live in under a
-minute at `https://<your-username>.github.io/<your-repo>/`.
-
-## Edit locally first
+## Edit locally
 
 ```bash
 pnpm install
@@ -45,37 +36,53 @@ pnpm dev
 
 Opens on <http://localhost:5173>. Hot-reloads on JSON changes.
 
-To check the JSON shapes without booting the dev server:
+To validate the JSON shapes without booting the dev server:
 
 ```bash
 pnpm validate
 ```
 
-This is the same check the CI runs before deploy.
+Same check CI runs before deploy.
+
+## Import an existing sale (from hosted or another self-hosted)
+
+If you have an export ZIP from <https://yrdsl.app> or from another
+self-hosted repo, drop it in with:
+
+```bash
+pnpm import path/to/sale.zip
+```
+
+Runs the same schema + photo-ref checks the hosted importer runs,
+then overwrites `site.json`, `items.json`, and `public/photos/`.
+Everything the script replaces goes into `.yrdsl-backup/<timestamp>/`
+first (gitignored) so you can roll back. Pass `--force` to skip the
+backup. Does not auto-commit: review with `git diff --staged` before
+pushing.
 
 ## Edit with Claude
 
-Two paths, pick whichever fits your workflow:
+Two paths.
 
-### Claude Code (easiest, no install)
+### Claude Code
 
-Open this repo in Claude Code. The `SKILL.md` at the repo root tells
-Claude the file layout and the common edit patterns. Claude uses its
-built-in Read/Edit/Write/Bash tools, so nothing else needs to be
-installed.
+Open your fork in Claude Code. The `SKILL.md` at the repo root tells
+Claude the file layout. Claude uses its built-in Read/Edit/Write/Bash
+tools; nothing else to install.
 
-### Claude Desktop via MCP (works from the desktop app chat)
+### Claude Desktop via MCP
 
-This repo ships the unified `yrdsl-mcp` server at `mcp/`. Same binary
-also works against a hosted yrdsl.app sale — same tool catalog, same
-prompts. One-time setup:
+This repo ships the `yrdsl-mcp` server at `mcp/`. It also works
+against hosted yrdsl.app sales.
+
+One-time setup:
 
 ```bash
 cd mcp
 pnpm install
 ```
 
-Then add this to your Claude Desktop config (macOS:
+Add to Claude Desktop's config (macOS:
 `~/Library/Application Support/Claude/claude_desktop_config.json`,
 Windows: `%APPDATA%\Claude\claude_desktop_config.json`):
 
@@ -91,17 +98,15 @@ Windows: `%APPDATA%\Claude\claude_desktop_config.json`):
 }
 ```
 
-**Heads up on `commit_and_push`:** the MCP doesn't carry a GitHub
-token of its own. When Claude calls `commit_and_push` it runs `git push`
-in your fork's directory and uses whatever auth your local git has set
-up (SSH key, gh-CLI credential helper, baked-in HTTPS token, etc.). If
-`git push` works in your terminal from your fork's directory, it'll
-work through Claude. If you've never pushed from that directory, run
-`gh auth login` once (or set up your SSH key) before asking Claude to
-deploy.
+Restart Claude Desktop.
 
-For a **hosted** yrdsl.app sale instead of this self-hosted repo, swap
-the `env` block:
+**About `commit_and_push`:** the MCP does not carry a GitHub token. It
+runs `git push` in the fork's directory using whatever credentials the
+local git already has (SSH key, gh-CLI helper, HTTPS token). If
+`git push` works in your terminal from that directory, it works from
+Claude. If not, run `gh auth login` (or set up SSH) first.
+
+To use the MCP against a hosted sale instead, swap the `env` block:
 
 ```json
 "env": {
@@ -110,24 +115,12 @@ the `env` block:
 }
 ```
 
-(Generate the token at <https://app.yrdsl.app/tokens> and find the sale
-id in the URL when editing on `app.yrdsl.app/sales/<id>`.)
-
-Restart Claude Desktop. You'll see the "yrdsl" server listed in the
-MCP menu; Claude can now edit the sale directly from any chat.
-
-### Prompts that work well
-
-- *"Add a toaster for $25, tags kitchen + appliance, using the photo I
-  just saved as toaster.jpg."*
-- *"Mark the couch reserved for $400 as of today."*
-- *"Switch the theme to retro."*
-- *"Commit and push."*
+Generate the token at <https://app.yrdsl.app/tokens>. The sale id is in
+the editor URL: `app.yrdsl.app/sales/<id>`.
 
 ## Custom domain
 
-1. Add a `CNAME` file at the repo root with your domain (e.g.
-   `sale.mydomain.com`).
+1. Add a `CNAME` file at the repo root containing your domain.
 2. Point a CNAME DNS record at `<your-username>.github.io`.
 3. In **Settings → Pages**, add the custom domain.
 4. In `.github/workflows/deploy.yml`, remove the `GH_PAGES_BASE` env var
@@ -136,36 +129,32 @@ MCP menu; Claude can now edit the sale directly from any chat.
 ## File layout
 
 ```
-site.json           # the sale's metadata
-items.json          # the array of items
-public/photos/      # photo files referenced from items.json
-src/vendor/         # the renderer (don't edit; vendored from the upstream repo)
-.github/workflows/  # auto-deploys on push to main
-SKILL.md            # tells Claude how to edit this repo
-scripts/validate.mjs # pre-deploy JSON validation
+site.json            # sale metadata
+items.json           # array of items
+public/photos/       # photo files referenced from items.json
+src/vendor/          # vendored renderer (do not edit)
+.github/workflows/   # deploy workflow
+SKILL.md             # instructions for Claude Code
+scripts/validate.mjs # JSON validation
+mcp/                 # MCP server for Claude Desktop
 ```
 
 ## JSON shape
 
-`site.json` and `items.json` validate against the zod schemas in
-`src/vendor/core/sale.ts`. The same shapes are produced by the hosted
-version of yrdsl.app, so you can move data between modes losslessly. See
-the [PRD §4.4](https://github.com/KuvopLLC/yrdsl/blob/main/PRD.md#44-distribution-modes)
-for the full hosted-vs-self-hosted comparison.
-
-## Want the hosted version instead?
-
-If you'd rather have multi-sale accounts, email confirmation, Claude
-over MCP from your phone, and metered billing, sign up at
-<https://yrdsl.app>. Operated by Kuvop LLC.
+`site.json` and `items.json` validate against the schemas in
+`src/vendor/core/sale.ts`. The hosted yrdsl.app produces the same
+shapes, so data moves between modes losslessly.
 
 ## Upstream
 
-The renderer source lives at <https://github.com/KuvopLLC/yrdsl> in
-`packages/viewer`. To pull a new version into your fork's `src/vendor/`,
-copy the files over and bump the deps in `package.json`. A vendor-refresh
-script is planned but not built.
+The renderer source lives at <https://github.com/KuvopLLC/yrdsl> under
+`packages/viewer`. A CI job on the upstream repo refreshes
+`src/vendor/` here when the renderer changes.
+
+## Contact
+
+[matt@mreider.com](mailto:matt@mreider.com).
 
 ## License
 
-Apache 2.0. Part of the [Kuvop OSS](https://oss.kuvop.com) family.
+Apache 2.0. Operated by [Kuvop LLC](https://oss.kuvop.com).
