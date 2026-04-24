@@ -422,12 +422,32 @@ function Modal({
     setTimeout(() => setCopied(false), 1800);
   }
 
+  const priceBlock = (
+    <div className="price-block">
+      {reserved && item.reserved ? (
+        <>
+          <span className="num strike">{money(item.price)}</span>
+          <span className="num">{money(item.reserved.price)}</span>
+        </>
+      ) : (
+        <span className="num">{money(item.price)}</span>
+      )}
+    </div>
+  );
+
   return (
     <div className="scrim" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <button type="button" className="close" onClick={onClose} aria-label="Close">
           ×
         </button>
+        {/* Mobile-only header. Put name and price above the image so the item
+            is always identified at a glance. Hidden on desktop via CSS; the
+            in-content copy below takes over there. */}
+        <div className="item-header-mobile" aria-hidden="true">
+          <h2>{item.title}</h2>
+          {priceBlock}
+        </div>
         <div className="image" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
           {reserved && <span className="badge reserved-badge badge-abs">Reserved</span>}
           {imgs[imgIdx] && <img src={imgs[imgIdx]} alt={item.title} />}
@@ -467,16 +487,7 @@ function Modal({
         </div>
         <div className="content">
           <h2>{item.title}</h2>
-          <div className="price-block">
-            {reserved && item.reserved ? (
-              <>
-                <span className="num strike">{money(item.price)}</span>
-                <span className="num">{money(item.reserved.price)}</span>
-              </>
-            ) : (
-              <span className="num">{money(item.price)}</span>
-            )}
-          </div>
+          {priceBlock}
           {item.description && <div className="desc">{item.description}</div>}
           <div className="meta">
             <span>
