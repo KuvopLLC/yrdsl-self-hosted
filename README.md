@@ -151,9 +151,13 @@ The renderer source lives at <https://github.com/KuvopLLC/yrdsl> under
 `packages/viewer`. A CI job on the upstream repo refreshes
 `src/vendor/` here when the renderer changes.
 
-## Contact
+## Help and feedback
 
-[matt@mreider.com](mailto:matt@mreider.com).
+- **Bugs / feature requests for this template or the renderer**:
+  [GitHub issues on KuvopLLC/yrdsl](https://github.com/KuvopLLC/yrdsl/issues).
+- **General questions, ideas, "I tried X and it was weird"**:
+  [r/yrdsl on Reddit](https://www.reddit.com/r/yrdsl/) — public, fastest reply.
+- **Private or security-sensitive**: [matt@mreider.com](mailto:matt@mreider.com).
 
 ## License
 
