@@ -99,6 +99,7 @@ export const CreateSaleBody = z.object({
   region: z
     .object({
       country: z.string().length(2),
+      subdivision: z.string().optional(),
       city: z.string().optional(),
     })
     .optional(),
@@ -184,11 +185,14 @@ export const SaleSite = z
     visibility: z.enum(['public', 'private']).default('public'),
     /** Host-only: secret token for private sales. URL is /s/{token}. Generated server-side. */
     privateToken: z.string().optional(),
-    /** Optional region for discovery search. */
+    /** Optional region for discovery search. Shown on public pages only. */
     region: z
       .object({
         /** ISO 3166-1 alpha-2 country code. */
         country: z.string().length(2),
+        /** ISO 3166-2 subdivision code (state, province, etc.) — optional for finer granularity. */
+        subdivision: z.string().optional(),
+        /** City name for discovery. */
         city: z.string().optional(),
       })
       .optional(),
