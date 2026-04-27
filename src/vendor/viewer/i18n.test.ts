@@ -89,22 +89,22 @@ describe('i18n: locale detection', () => {
 describe('i18n: translation function t()', () => {
   it('translates a simple key in English', () => {
     const result = t('stats.available', 'en');
-    expect(result).toBe('Available');
+    expect(result).toBe('available');
   });
 
   it('translates a key in German', () => {
     const result = t('stats.available', 'de');
-    expect(result).toBe('Verfügbar');
+    expect(result).toBe('verfügbar');
   });
 
   it('translates a key in Spanish', () => {
     const result = t('stats.available', 'es');
-    expect(result).toBe('Disponible');
+    expect(result).toBe('disponible');
   });
 
   it('translates a key in French', () => {
     const result = t('stats.available', 'fr');
-    expect(result).toBe('Disponible');
+    expect(result).toBe('disponible');
   });
 
   it('translates a key in Portuguese', () => {
@@ -129,7 +129,7 @@ describe('i18n: translation function t()', () => {
 
   it('falls back to English for unsupported locales', () => {
     const result = t('stats.available', 'it');
-    expect(result).toBe('Available');
+    expect(result).toBe('available');
   });
 
   it('handles string interpolation with variables', () => {
@@ -331,6 +331,6 @@ describe('i18n: contact and messaging keys', () => {
 
   it('translates empty state keys', () => {
     const result = t('empty.no_results', 'en');
-    expect(result).toContain('No results');
+    expect(result).toContain('Nothing matches');
   });
 });

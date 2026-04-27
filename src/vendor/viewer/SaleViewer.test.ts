@@ -390,7 +390,7 @@ describe('SaleViewer: locale-specific field lookup', () => {
     test('handles missing localStorage gracefully', () => {
       // Some browsers/environments might not have localStorage
       const stored = localStorage.getItem('yrdsl-locale');
-      expect(stored).toBeDefined(); // Will be null or the value
+      expect(typeof stored === 'string' || stored === null).toBe(true);
     });
   });
 
